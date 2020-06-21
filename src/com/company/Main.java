@@ -1,15 +1,9 @@
 package com.company;
 
-import com.company.Model.Entitys.Security;
-
-import java.security.NoSuchAlgorithmException;
+import com.company.Controller.Startup;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            System.out.println(Security.SecurityBuilder().sha1("amir"));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+        Startup.StartupBuilder().start();
     }
 }

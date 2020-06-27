@@ -5,8 +5,9 @@ import java.util.ArrayList;
 public class Certificate{
     public int id;
     public int ownerId;
-    private boolean isActive;
-    private int point;
-    private long penalty;
-    ArrayList<Log> logs;
+    public boolean isActive;
+    public int point;
+    public long penalty;
+    public String CarTag;
+    public ArrayList<Log> logs;
 }

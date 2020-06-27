@@ -5,4 +5,6 @@ public class Car {
     public String carTag;
     public Owner owner;
     public String vin;
+    public String model;
+    public String color;
 }

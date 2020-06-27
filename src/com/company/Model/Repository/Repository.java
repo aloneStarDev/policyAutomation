@@ -1,7 +1,6 @@
 package com.company.Model.Repository;
 
-import com.company.Model.Entitys.Person;
-import com.company.Model.Entitys.User;
+import com.company.Model.Entitys.*;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,13 +37,15 @@ public class Repository extends ConnectionManager{
             statement.setString(4,p.getPhoneNumber());
             statement.setString(5,p.getAddress());
             statement.execute();
-            PreparedStatement preparedStatement =connection.prepareStatement("select `id` from `policy`.`person` where nationCode = ?");
+            PreparedStatement preparedStatement =connection.prepareStatement("select id from `policy`.`person` where nationCode = ?");
             preparedStatement.setString(1, p.getNationCode());
-            return preparedStatement.executeQuery().getInt("id");
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next())
+                return rs.getInt("id");
         }catch (SQLException ex){
             ex.printStackTrace();
-            return 0;
         }
+        return 0;
     }
     private String Condition(Map<String, String> identifier)
     {
@@ -73,7 +74,17 @@ public class Repository extends ConnectionManager{
         }
         return false;
     }
-
+    public synchronized ResultSet getPerson(int id){
+        ResultSet rs = null;
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`person` where id = ?");
+            statement.setInt(1,id);
+            rs = statement.executeQuery();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs;
+    }
     public synchronized ResultSet getPerson(Map<String,String> identifier){
         ResultSet rs = null;
         try {
@@ -84,6 +95,25 @@ public class Repository extends ConnectionManager{
         }
         return rs;
     }
+    public int[] getOwner(String key,int val){
+        int[] links = {0,0,0,0,0};
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`owner` where "+key+" = ?");
+            statement.setInt(1,val);
+            ResultSet rs =statement.executeQuery();
+            if(rs.next())
+            {
+                links[0] = rs.getInt("id");
+                links[1] = rs.getInt("carId");
+                links[2] = rs.getInt("personId");
+                links[3] = rs.getInt("certificateId");
+                links[4] = rs.getInt("userId");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return links;
+    }
     public synchronized int InsertUser(User u){
         try {
             PreparedStatement statement = connection.prepareStatement("insert into `policy`.`user` (`username`,`password`) values (?,?);");
@@ -91,12 +121,176 @@ public class Repository extends ConnectionManager{
             statement.setString(2,u.getHashedPassword());
             statement.execute();
 
-            PreparedStatement preparedStatement =connection.prepareStatement("select `id` from `policy`.`user` where username = ?");
+            PreparedStatement preparedStatement =connection.prepareStatement("select id from `policy`.`user` where username = ?");
             preparedStatement.setString(1, u.getUsername());
-            return preparedStatement.executeQuery().getInt("id");
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next())
+                return rs.getInt("id");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-            return 0;
         }
+        return 0;
+    }
+    public ResultSet getCar(int id){
+        ResultSet rs = null;
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`car` where id = ?");
+            statement.setInt(1,id);
+            rs = statement.executeQuery();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs;
+    }
+    public ResultSet getCar(String vin){
+        ResultSet rs = null;
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`car` where vin = ?");
+            statement.setString(1,vin);
+            rs = statement.executeQuery();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs;
+    }
+    public ResultSet getCertificate(String key,int val){
+        ResultSet rs = null;
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`certificate` where ? = ?");
+            statement.setString(1,key);
+            statement.setInt(2,val);
+            rs = statement.executeQuery();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs;
+    }
+    public ResultSet getCertificate(String plk){
+        ResultSet rs = null;
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`certificate` where `carTag` = ?");
+            statement.setString(1,plk);
+            rs = statement.executeQuery();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs;
+    }
+    public ResultSet getLogs(int id){
+        ResultSet rs = null;
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`log` where cardId = ?");
+            statement.setInt(1,id);
+            rs = statement.executeQuery();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs;
+    }
+    public int[] getAgent(String key,int value){
+        int[] agentLinks = {0,0,0,0};
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`agent` where "+key+" = ?");
+            statement.setInt(1,value);
+            ResultSet rs = statement.executeQuery();
+            if(rs!=null && rs.next())
+            {
+                agentLinks[0] = rs.getInt(1);
+                agentLinks[1] = rs.getInt(2);
+                agentLinks[2] = rs.getInt(3);
+                agentLinks[3] = rs.getInt(4);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return agentLinks;
+    }
+
+    public boolean insertAgent(Agent a) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("insert into `policy`.`agent` (`rank`,`userId`,`personId`) values (?,?,?)");
+            int r = 0;
+            for (MilitaryRank m :MilitaryRank.values()) {
+                if(m == a.rank)
+                    break;
+                r++;
+            }
+            statement.setInt(1,r);
+            statement.setInt(2,a.user.id);
+            statement.setInt(3,a.getId());
+            statement.execute();
+            return true;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean InsertCar(Car c) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("insert into `policy`.`car` (`color`,`model`,`vin`) values (?,?,?)");
+            statement.setString(1,c.color);
+            statement.setString(2,c.model);
+            statement.setString(3,c.vin);
+            statement.execute();
+            return true;
+        } catch (SQLException throwables) {
+            if(!throwables.getMessage().contains("Duplicate entry"))
+                throwables.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean Trade(int buyid, int sellid, int carid,String plk) {
+        try {
+            connection.setAutoCommit(false);
+            //plk
+            PreparedStatement statement1 = connection.prepareStatement("UPDATE `car` SET `ownerId` = ? and `carTag` = ? WHERE `car`.`id` = ?");
+            statement1.setInt(1,buyid);
+            statement1.setString(2,plk);
+            statement1.setInt(3,carid);
+            statement1.execute();
+            //sell  ======> if sell id is 0 then seller is factory
+            if(sellid != 0){
+                PreparedStatement statement2 = connection.prepareStatement("UPDATE `owner` SET `carId` = ?  WHERE `owner`.`id` = ?");
+                statement2.setInt(1,0);
+                statement2.setInt(2,sellid);
+                statement2.execute();
+            }
+            //buy
+            PreparedStatement statement3 = connection.prepareStatement("UPDATE `owner` SET `carId` = ?  WHERE `owner`.`id` = ?");
+            statement3.setInt(1,carid);
+            statement3.setInt(2,buyid);
+            statement3.execute();
+            connection.commit();
+            connection.setAutoCommit(true);
+            return true;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
+    }
+
+    public void updateCertificate(int certificateId, String plk) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("UPDATE `policy`.`certificate` SET `carTag` = ? WHERE `certificate`.`id` = ?");
+            statement.setString(1,plk);
+            statement.setInt(2,certificateId);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public ResultSet selectNationCode() {
+        ResultSet rs = null;
+        try {
+            Statement statement = connection.createStatement();
+            rs = statement.executeQuery("select `username` from `policy`.`user`");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs;
     }
 }

@@ -1,15 +1,21 @@
 package com.company.View;
 
+import com.company.Model.Entitys.Agent;
+import com.company.Model.Entitys.Owner;
 import com.company.Model.Entitys.User;
 import com.company.Model.Services.Access;
 import com.company.Model.Services.MemberServices;
+import com.company.Model.Services.OfficerServices;
+import com.company.View.AgentPanel.EmployeePanel;
+import com.company.View.AgentPanel.OfficerPanel;
+import com.company.View.AgentPanel.SupervisorPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class UiManager extends JFrame {
-    static JFrame jFrame;
+    public static JFrame jFrame;
     public UiManager(){
         super("الکترو سایبر");
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -52,7 +58,27 @@ public class UiManager extends JFrame {
                 if(user != null)
                 {
                     UiManager.jFrame.dispose();
-                    new MemberPanel(new MemberServices().getMember(user));
+                    Owner o = new MemberServices().getMember(user);
+                    if(o!=null)
+                        new MemberPanel(o);
+                    else
+                    {
+                        Agent a = new OfficerServices().getAgent(user);
+                        if(a!=null)
+                        {
+                            switch (a.rank){
+                                case officer:
+                                    new OfficerPanel(a);
+                                    break;
+                                case supervisor:
+                                    new SupervisorPanel(a);
+                                    break;
+                                case employee:
+                                    new EmployeePanel(a);
+                                    break;
+                            }
+                        }
+                    }
                 }
                 else
                     JOptionPane.showMessageDialog(null,"نام کاربری یا گذرواژه اشتباه است","عدم دسترسی",JOptionPane.ERROR_MESSAGE);
@@ -64,7 +90,7 @@ public class UiManager extends JFrame {
         register.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Register r = new Register();
+                RegisterMember r = new RegisterMember();
                 jFrame.dispose();
             }
         });

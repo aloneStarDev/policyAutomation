@@ -9,9 +9,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class Register extends JFrame {
+public class RegisterMember extends JFrame {
     static JFrame jFrame;
-    public Register(){
+    public RegisterMember(){
         super("ثبت نام");
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);

@@ -10,4 +10,16 @@ public class Certificate{
     public long penalty;
     public String CarTag;
     public ArrayList<Log> logs;
+
+    @Override
+    public String toString() {
+        return "Certificate{" +
+                "id=" + id +"\n"+
+                ", ownerId=" + ownerId +"\n"+
+                ", isActive=" + isActive +"\n"+
+                ", point=" + point +"\n"+
+                ", penalty=" + penalty +"\n"+
+                ", CarTag='" + CarTag + '\'' +"\n"+
+                '}';
+    }
 }

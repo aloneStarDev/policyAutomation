@@ -1,6 +1,8 @@
 package com.company.View;
 
 import com.company.Model.Entitys.Owner;
+import com.company.Model.Entitys.ValidationException;
+import com.company.Model.Services.MemberServices;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -50,10 +52,58 @@ public class MemberPanel extends JFrame {
 
         JButton penaltyBtn = new JButton("استعلام خلافی");
         penaltyBtn.setBounds( 100,150,150,30);
+        penaltyBtn.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                StringBuilder sb = new StringBuilder();
+                if (owner.certificate!=null) {
+                    sb.append("نمره منفی شما:");
+                    sb.append(o.certificate.point);
+                    sb.append("\n");
+                    sb.append("جریمه ی شما:");
+                    sb.append(o.certificate.penalty);
+                    sb.append("\n");
+                    if(o.certificate.logs!=null && o.certificate.logs.size()!=0) {
+                        sb.append("لیست عملکرد شما:");
+                        o.certificate.logs.forEach(x -> {
+                            sb.append("\n");
+                            sb.append("===============================");
+                            sb.append("\n");
+                            sb.append(x.key);
+                            sb.append("\n");
+                            sb.append(x.value);
+                            sb.append("\n");
+                            sb.append(x.messages);
+                            sb.append("\n");
+                            sb.append("===============================");
+                        });
+                    }
+                }else
+                    sb.append("شما خلافی ندارید");
+                new MessageBox("اطلاعات خلافی",sb.toString());
+            }
+        });
         layeredPane.add(penaltyBtn);
 
         JButton payBtn = new JButton("پرداخت جریمه");
         payBtn.setBounds( 100,200,150,30);
+        payBtn.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String s = JOptionPane.showInputDialog("جریمه ی شما "+o.certificate.penalty+"است.. مبلغ قابل پرداخت را وارد کنید");
+                try {
+                    long n = Long.parseLong(s);
+                    if (n>o.certificate.penalty)
+                        throw  new ValidationException("مبلغ ورودی نمی تواند از مبلغ کل جریمه بیشتر باشد");
+                    o.certificate.penalty -= n;
+                    new MemberServices().payP(o.certificate.penalty,o.certificate.id);
+                }catch (NumberFormatException ex){
+                    JOptionPane.showMessageDialog(null,"لطفا مبلغ صحیحی را وارد کنید");
+                }catch (ValidationException ex){
+                    JOptionPane.showMessageDialog(null,ex.getMessage());
+                }
+            }
+        });
         layeredPane.add(payBtn);
 
         JButton profileBtn = new JButton("اطلاعات کاربری");

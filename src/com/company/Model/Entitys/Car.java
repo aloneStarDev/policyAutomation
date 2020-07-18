@@ -7,4 +7,16 @@ public class Car {
     public String vin;
     public String model;
     public String color;
+
+    @Override
+    public String toString() {
+        return "Car{" +
+                "id=" + id +"\n"+
+                ", carTag='" + carTag + '\'' +"\n"+
+                ", owner=" + owner.toString() +"\n"+
+                ", vin='" + vin + '\'' +"\n"+
+                ", model='" + model + '\'' +"\n"+
+                ", color='" + color + '\'' +"\n"+
+                '}';
+    }
 }

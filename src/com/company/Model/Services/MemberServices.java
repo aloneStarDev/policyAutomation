@@ -42,4 +42,9 @@ public class MemberServices {
             o.car.owner = o;
         return o;
     }
+
+    public void payP(long newP,int certificateID) {
+        ObjectRelationMap.editPnalty(certificateID,newP);
+    }
+
 }

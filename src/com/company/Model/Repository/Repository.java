@@ -156,9 +156,8 @@ public class Repository extends ConnectionManager{
     public ResultSet getCertificate(String key,int val){
         ResultSet rs = null;
         try {
-            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`certificate` where ? = ?");
-            statement.setString(1,key);
-            statement.setInt(2,val);
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`certificate` where "+key+" = ?");
+            statement.setInt(1,val);
             rs = statement.executeQuery();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -246,20 +245,20 @@ public class Repository extends ConnectionManager{
         try {
             connection.setAutoCommit(false);
             //plk
-            PreparedStatement statement1 = connection.prepareStatement("UPDATE `car` SET `ownerId` = ? and `carTag` = ? WHERE `car`.`id` = ?");
+            PreparedStatement statement1 = connection.prepareStatement("UPDATE `policy`.`car` SET `ownerId` = ? , `carTag` = ? WHERE id = ?");
             statement1.setInt(1,buyid);
             statement1.setString(2,plk);
             statement1.setInt(3,carid);
             statement1.execute();
             //sell  ======> if sell id is 0 then seller is factory
             if(sellid != 0){
-                PreparedStatement statement2 = connection.prepareStatement("UPDATE `owner` SET `carId` = ?  WHERE `owner`.`id` = ?");
+                PreparedStatement statement2 = connection.prepareStatement("UPDATE `policy`.`owner` SET `carId` = ?  WHERE id = ?");
                 statement2.setInt(1,0);
                 statement2.setInt(2,sellid);
                 statement2.execute();
             }
             //buy
-            PreparedStatement statement3 = connection.prepareStatement("UPDATE `owner` SET `carId` = ?  WHERE `owner`.`id` = ?");
+            PreparedStatement statement3 = connection.prepareStatement("UPDATE `policy`.`owner` SET `carId` = ?  WHERE id = ?");
             statement3.setInt(1,carid);
             statement3.setInt(2,buyid);
             statement3.execute();
@@ -292,5 +291,82 @@ public class Repository extends ConnectionManager{
             throwables.printStackTrace();
         }
         return rs;
+    }
+
+    public boolean createCertificate(int ownerId) {
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO `policy`.`certificate` (`ownerId`,`point`,`isactive`,`penalty`) values (?,?,?,?)");
+            statement.setInt(1,ownerId);
+            statement.setInt(2,0);
+            statement.setBoolean(3,true);
+            statement.setLong(4,0);
+            statement.execute();
+            PreparedStatement statement1 = connection.prepareStatement("select `id` from `policy`.`certificate` where ownerId=?");
+            statement1.setInt(1,ownerId);
+            ResultSet rs = statement1.executeQuery();
+            int certificateId = 0;
+            if(rs.next())
+                 certificateId = rs.getInt("id");
+            PreparedStatement statement2 = connection.prepareStatement("UPDATE `policy`.`owner` SET `certificateId` = ? WHERE `owner`.`id` = ?");
+            statement2.setInt(1,certificateId);
+            statement2.setInt(2,ownerId);
+            statement2.execute();
+            connection.commit();
+            connection.setAutoCommit(true);
+            return true;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return false;
+    }
+
+    public void updatePenalty(int id,long p) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("UPDATE `policy`.`certificate` SET `penalty` = ? WHERE id = ?");
+            statement.setLong(1,p);
+            statement.setInt(2,id);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+    public ResultSet getCar(String key,String value){
+        ResultSet rs = null;
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from `policy`.`car` where "+key+" = ?");
+            statement.setString(1,value);
+            rs = statement.executeQuery();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return rs;
+    }
+
+    public void updatePoint(int id, int point) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("UPDATE `policy`.`certificate` SET `point` = ? WHERE id = ?");
+            statement.setInt(1,point);
+            statement.setInt(2,id);
+            statement.execute();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public boolean insertLog(Log l) {
+        try{
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO `policy`.`log` (`cardId`, `key`, `value`, `message`) VALUES (?,?,?,?)");
+            statement.setInt(1,l.cardId);
+            statement.setString(2,l.key);
+            statement.setString(3,l.value);
+            statement.setString(4,l.messages);
+            statement.execute();
+            return true;
+        }catch (SQLException ex){
+            ex.printStackTrace();
+        }
+        return false;
+
     }
 }

@@ -10,23 +10,29 @@ public class MessageBox extends JFrame {
     public MessageBox(String title,String message){
         super(title);
         this.setSize(700,500);
-        this.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width/2)-250,500);
+        this.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width/2)-250,400);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        JLayeredPane layeredPane = new JLayeredPane();
-        this.setLayeredPane(layeredPane);
+
+        this.getContentPane().setLayout(new FlowLayout());
         this.setResizable(false);
 
 
         JTextPane output = new JTextPane();
-
         SimpleAttributeSet attribs = new SimpleAttributeSet();
-        StyleConstants.setAlignment(attribs, StyleConstants.ALIGN_RIGHT);
+        StyleConstants.setAlignment(attribs, StyleConstants.ALIGN_CENTER);
         StyleConstants.setFontSize(attribs,21);
         output.setParagraphAttributes(attribs, true);
         output.setText(message);
-        output.setBounds(100,0,500,500);
-        layeredPane.add(output);
+        output.setEditable(false);
+        output.setBounds(0,0,500,700);
+
+        JScrollPane scrollPane = new JScrollPane(output);
+        scrollPane.setPreferredSize(new Dimension(700, 500));
+//        add(scrollPane, BorderLayout.CENTER);
+
+
+        this.getContentPane().add(scrollPane);
 
         this.setVisible(true);
         jFrame = this;

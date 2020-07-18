@@ -9,10 +9,9 @@ public class Owner extends Person{
     @Override
     public String toString() {
         return "Owner{" +
-                "id=" + id +
-                ", car=" + car +
-                ", certificate=" + certificate +
-                ", user=" + user +
+                "id=" + id +"\n"+
+                ", certificate=" + certificate.toString() +"\n"+
+                ", user=" + user.toString() +"\n"+
                 '}'+super.toString();
     }
 }

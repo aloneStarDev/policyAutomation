@@ -49,7 +49,14 @@ public class Person {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) throws ValidationException {
+        if (phoneNumber.length() != 11)
+            throw new ValidationException("شماره تماس صحیح نمی باشد");
+        if(!phoneNumber.equals("093xxxxxxxx"))
+            for (char c : phoneNumber.toCharArray()) {
+                if(c <'0' || c >'9')
+                throw new ValidationException("شماره تماس صحیح نمی باشد");
+            }
         this.phoneNumber = phoneNumber;
     }
 
@@ -73,12 +80,12 @@ public class Person {
     @Override
     public String toString() {
         return "Person{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", nationCode='" + nationCode + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", address='" + address + '\'' +
+                "id=" + id +"\n"+
+                ", firstName='" + firstName + '\'' +"\n"+
+                ", lastName='" + lastName + '\'' +"\n"+
+                ", nationCode='" + nationCode + '\'' +"\n"+
+                ", phoneNumber='" + phoneNumber + '\'' +"\n"+
+                ", address='" + address + '\'' +"\n"+
                 '}';
     }
 }

@@ -171,6 +171,7 @@ public class ORM {
                 c.ownerId = rs.getInt("ownerId");
                 c.isActive = rs.getBoolean("isActive");
                 c.penalty = rs.getLong("penalty");
+                c.point = rs.getInt("point");
                 c.CarTag = rs.getString("CarTag");
                 c.logs = this.getLogs(c.id);
             }
@@ -205,7 +206,8 @@ public class ORM {
 
 
     public boolean swapCar(int buyid, int sellid, int carid,String plk) {
-       return repository.Trade(buyid,sellid,carid,plk);
+        System.out.println(buyid+"===sellid"+sellid+"===carid"+carid+"==="+plk);
+        return repository.Trade(buyid,sellid,carid,plk);
     }
 
     public Certificate checkPlk(String sb) {
@@ -242,5 +244,56 @@ public class ORM {
             throwables.printStackTrace();
         }
         return nationCodes;
+    }
+
+    public boolean createCertificate(int ownerId) {
+        return repository.createCertificate(ownerId);
+    }
+
+    public void editPnalty(int key, long value) {
+        repository.updatePenalty(key,value);
+    }
+
+    public Car getCar(String identifier, String value) {
+        Car c = null;
+        try {
+            ResultSet rs = repository.getCar(identifier,value);
+            if(rs != null && rs.next()){
+                c = new Car();
+                c.id = rs.getInt("id");
+                c.carTag = rs.getString("carTag");
+                int ownerId = rs.getInt("ownerId");
+                if(ownerId == 0)
+                    c.owner = null;
+                else {
+                    c.owner = getOwner(getOwnerLinks("id",ownerId));
+                }
+                c.vin = rs.getString("vin");
+                c.model = rs.getString("model");
+                c.color = rs.getString("color");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return c;
+    }
+    private Owner getOwner(int[] OwnerLink){
+        ResultSet rs = null;
+        if(OwnerLink == null)
+            return null;
+        Owner o = new Owner();
+        o.id = OwnerLink[0];
+        o.setPerson(getPerson(OwnerLink[2]));
+        o.user = getUser(o.getNationCode());
+        o.certificate = getCertificate("id",OwnerLink[3]);
+        return o;
+    }
+
+    public void editPoint(int id, int point) {
+        repository.updatePoint(id,point);
+    }
+
+    public void addLog(Log l) {
+        repository.insertLog(l);
     }
 }

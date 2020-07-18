@@ -66,9 +66,12 @@ public class OfficerServices {
     private String GenerateCarTag(int certificateId){
         StringBuilder sb = new StringBuilder();
         Random r= new Random();
-        for(int i=0;i<7;i++)
-            sb.append(r.nextInt());
+        for(int i=0;i<7;i++) {
+            int x = Math.abs(r.nextInt()%10);
+            sb.append(x);
+        }
         if(ObjectRelationMap.checkPlk(sb.toString())==null) {
+            System.out.println(sb.toString());
             ObjectRelationMap.regiseterPlk(sb.toString(), certificateId);
             return sb.toString();
         }
@@ -94,7 +97,10 @@ public class OfficerServices {
             data[i][4] = members.get(i).getNationCode();
             if(members.get(i).certificate != null) {
                 data[i][5] = members.get(i).certificate.point + "";
-                data[i][6] = members.get(i).certificate.CarTag;
+                if(members.get(i).certificate.CarTag == null || members.get(i).certificate.CarTag.isEmpty())
+                    data[i][6] = "فاقد پلاک";
+                else
+                    data[i][6] = members.get(i).certificate.CarTag;
                 data[i][7] = members.get(i).certificate.penalty+"";
             }
             else {
@@ -104,5 +110,22 @@ public class OfficerServices {
             }
         }
         return data;
+    }
+
+    public boolean registerCertificate(int ownerId) {
+        return ObjectRelationMap.createCertificate(ownerId);
+    }
+
+    public Car findCar( String identifier, String value) {
+        return ObjectRelationMap.getCar(identifier, value);
+    }
+    public void addPenalty(String plk,Log l,int point,long penalty){
+        Car c = ObjectRelationMap.getCar("carTag",plk);
+        penalty += c.owner.certificate.penalty;
+        point += c.owner.certificate.point;
+        ObjectRelationMap.editPnalty(c.owner.certificate.id,penalty);
+        ObjectRelationMap.editPoint(c.owner.certificate.id,point);
+        l.cardId = c.owner.certificate.id;
+        ObjectRelationMap.addLog(l);
     }
 }
